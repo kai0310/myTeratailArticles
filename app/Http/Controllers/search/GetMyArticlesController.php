@@ -48,8 +48,7 @@ class GetMyArticlesController extends Controller
         $meta = $resultArray['meta'];
         //リクエストに失敗したら処理終了
         if($meta['message'] != 'success'){
-            echo $meta['message'];
-            return;
+            dd($meta['message']);
         }
         $searchArray = explode (' ',$requestParam['searchWord']);
         $returnQuestions = utils::searchWord($resultArray[$category], $searchArray);
