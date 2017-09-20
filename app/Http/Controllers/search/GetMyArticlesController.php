@@ -5,6 +5,7 @@ namespace App\Http\Controllers\search;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Cookie;
 use App\Facades\teratailAPI;
 use App\Facades\utils;
@@ -15,14 +16,23 @@ use App\Facades\utils;
 class GetMyArticlesController extends Controller
 {
     public function searchArticle(Request $request) {
-        $request->validate([
+        $requestParam = $request->all();
+        $validator = Validator::make($requestParam,[
             'searchWord' => 'required',
             'accesstoken'=> 'required',
             'userID'=> 'required',
         ]);
-        $requestParam = $request->all();
         $getArticle = $this->getMyArticles($requestParam);
-        
+        $validator->after(function($validator) use($getArticle){
+            if(!is_array($getArticle)){
+                $validator->errors()->add('searchWord','不正なリクエストです:'.$getArticle);
+            }
+        });
+        if($validator->fails()){
+            return redirect('/')
+                        ->withErrors($validator)
+                        ->withInput();
+        }
         $response = new Response(view('searchResult', compact('getArticle','requestParam')));
         if(isset($requestParam['saveCookie'])){
             $response->withCookie(cookie()->forever('accesstoken', $requestParam['accesstoken']));
@@ -33,8 +43,10 @@ class GetMyArticlesController extends Controller
         }
         return $response;
     }
-    /***
-     * APIを使って自分が回答した内容を検索する
+    /**
+     * リクエスト内容を元に、teratailから記事を取得する
+     * @param array $requestParam ユーザーID,
+     * @return type
      */
     private function getMyArticles(Array $requestParam){
         if($requestParam['answerOrQuestion']=='isAnswer'){
@@ -46,9 +58,9 @@ class GetMyArticlesController extends Controller
         }
         $resultArray = teratailAPI::callAPI($requestParam,$url);
         $meta = $resultArray['meta'];
-        //リクエストに失敗したら処理終了
+        //リクエストに失敗したらエラーメッセージを残して処理終了
         if($meta['message'] != 'success'){
-            dd($meta['message']);
+            return $meta['message'];
         }
         $searchArray = explode (' ',$requestParam['searchWord']);
         $returnQuestions = utils::searchWord($resultArray[$category], $searchArray);
