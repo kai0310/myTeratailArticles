@@ -8,7 +8,7 @@
                 {{ csrf_field() }}
                 <div class="row">
                     <div class="col-md-9 col-md-offset-2 form-group">
-                        <input class="form-control" type="text" name="searchWord" placeholder="検索キーワードを入力" required="">
+                        <input class="form-control" type="text" name="searchWord" placeholder="検索キーワードを入力" required value="{{ old('searchWord') }}">
                     </div>
                 </div>
                 <div class="row form-group">
