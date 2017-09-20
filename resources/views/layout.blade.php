@@ -12,15 +12,6 @@
         <link href="http://kevinburke.bitbucket.org/markdowncss/markdown.css" rel="stylesheet">
     </head>
     <body >
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
         <div class="bs-docs-section clearfix">
             <div class="row">
                 <div class="col-lg-12">
@@ -34,6 +25,15 @@
                     </div>
                 </div>
             </div>
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             @yield('content')
         </div>
         <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>    
