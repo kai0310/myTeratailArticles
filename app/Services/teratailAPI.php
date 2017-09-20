@@ -3,15 +3,13 @@ namespace App\Services;
 class teratailAPI{
     /**
      * 実際にAPIを実行する処理。取得結果を配列にデコードして返却
-     * @param array $requestParam(ユーザID,アクセストークンを利用)
+     * @param array $requestParam ユーザID,アクセストークンを利用
      * @param string $url
      * @param int $page
      * @return type
      */
     public function callAPI(Array $requestParam, string $url,int $page=0) {
-        $username = $requestParam['userID'];        
         $access_token = $requestParam['accesstoken'];
-        $url = $url;
         if($page){
             $url .= '&page='.$page;
         }
