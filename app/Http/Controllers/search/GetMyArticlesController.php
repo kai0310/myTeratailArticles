@@ -29,9 +29,7 @@ class GetMyArticlesController extends Controller
             }
         });
         if($validator->fails()){
-            return redirect('/')
-                        ->withErrors($validator)
-                        ->withInput();
+            return redirect('/')->withErrors($validator)->withInput();
         }
         $response = new Response(view('searchResult', compact('getArticle','requestParam')));
         if(isset($requestParam['saveCookie'])){
@@ -44,35 +42,27 @@ class GetMyArticlesController extends Controller
         return $response;
     }
     /**
-     * リクエスト内容を元に、teratailから記事を取得する
-     * @param array $requestParam ユーザーID,
+     * TeratailAPIをページネーションしながら呼び出し、全ての記事を取得する。
+     * @param array $requestParam
      * @return type
      */
     private function getMyArticles(Array $requestParam){
-        if($requestParam['answerOrQuestion']=='isAnswer'){
-            $url = 'https://teratail.com/api/v1/users/'. $requestParam['userID'] .'/replies?limit=100';
-            $category = 'replies';
-        }else{
-            $url = 'https://teratail.com/api/v1/users/'. $requestParam['userID'] .'/questions?limit=100';
-            $category = 'questions';
-        }
+        $category = $requestParam['answerOrQuestion']==='isAnswer'?'replies':'questions';
+        $url = 'https://teratail.com/api/v1/users/'. $requestParam['userID'] .'/'.$category.'?limit=100';
         $resultArray = teratailAPI::callAPI($requestParam,$url);
-        $meta = $resultArray['meta'];
-        //リクエストに失敗したらエラーメッセージを残して処理終了
-        if($meta['message'] != 'success'){
-            return $meta['message'];
+       if($resultArray['meta']['message'] != 'success'){ //metaの内容を確認してエラーがあったら終了
+            return $resultArray['meta']['message'];
         }
-        $searchArray = explode (' ',$requestParam['searchWord']);
-        $returnQuestions = utils::searchWord($resultArray[$category], $searchArray);
-        //質問もしくはを100件以上していたらページネーションして全記事を取得
-        if($meta['hit_num'] > 100){
-            $page = ceil($meta['hit_num'] / 100);
-            for($i=2;$i<$page+1;$i++){
-                $resultArrayAdds = teratailAPI::callAPI($requestParam,$url,$i);//2ページ目以降
-                $returnQuestionsAdded =  utils::searchWord($resultArrayAdds[$category], $searchArray);
-                $returnQuestions =  array_merge($returnQuestions, $returnQuestionsAdded);
-            }
+        $searchArray = explode(' ',$requestParam['searchWord']);
+        $articles = utils::searchWord($resultArray[$category], $searchArray);
+
+        for ($i=2;$i<=$resultArray['meta']['total_page'];$i++){//2ページ目から最終ページまでを取得する
+            $nextResultArray = teratailAPI::callAPI($requestParam,$url,$i);
+            if($nextResultArray['meta']['message'] != 'success'){ //metaの内容を確認してエラーがあったら終了
+                 return $nextResultArray['meta']['message'];
+             }
+            $articles = array_merge($articles, utils::searchWord($nextResultArray[$category], $searchArray));
         }
-        return $returnQuestions;
+        return $articles;
     }
 }
