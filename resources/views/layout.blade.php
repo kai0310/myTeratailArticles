@@ -19,7 +19,7 @@
                         <nav class="navbar navbar-dark bg-primary">
                             <button class="navbar-toggler hidden-lg-up" type="button" data-toggle="collapse" data-target="#navbarResponsive2" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"></button>
                             <div class="container collapse navbar-toggleable-md" id="navbarResponsive2">
-                                <a class="navbar-brand" href="/myTeratailArticles/public/">teratail過去記事検索</a>
+                                <a class="navbar-brand" href="./">teratail過去記事検索</a>
                             </div>
                         </nav>
                     </div>
