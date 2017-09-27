@@ -30,5 +30,8 @@ class AppServiceProvider extends ServiceProvider
         App::bind('utils',function(){
             return new \App\Services\utils;
         });
+        if ($this->app->environment("local")) {
+            $this->app->register('Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider');
+        }
     }
 }
